@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @method static find($id)
+ */
 class Tag extends Model
 {
     use HasFactory;
@@ -14,8 +17,9 @@ class Tag extends Model
     protected $fillable = [
         'name'
     ];
-    public function HagTag()
+
+    public function tag()
     {
-        return $this->belongsTo(Post::class);
+        return $this->hasOne(Post::class,'tag_id');
     }
 }

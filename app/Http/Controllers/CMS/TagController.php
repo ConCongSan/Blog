@@ -3,21 +3,21 @@
 namespace App\Http\Controllers\CMS;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Backend\TagRepository;
+use App\Repositories\ITagRepository;
 use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
-    protected $tag;
+    protected $tagRepository;
 
-    public function __construct(TagRepository $tag)
+    public function __construct(ITagRepository $tagRepository)
     {
-        $this->tag = $tag;
+        $this->tagRepository = $tagRepository;
     }
 
     public function getAllTag()
     {
-        $tag = $this->tag->index();
+        $tag = $this->tagRepository->all();
         return response()->json([
             'data' => $tag
         ]);
@@ -26,7 +26,7 @@ class TagController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        $tag = $this->tag->store($data);
+        $tag = $this->tagRepository->create($data);
         if (empty($tag)) {
             return response()->json([
                 'status' => false,
@@ -41,7 +41,7 @@ class TagController extends Controller
 
     public function update(Request $request, $id)
     {
-        $tag = $this->tag->show($id);
+        $tag = $this->tagRepository->find($id);
         if (empty($tag)) {
             return response()->json([
                 'status' => false,
@@ -49,7 +49,7 @@ class TagController extends Controller
             ]);
         }
         $tag = $request->all();
-        $data = $this->tag->update($id, $tag);
+        $data = $this->tagRepository->update($id, $tag);
         return response()->json([
             'status' => true,
             'message' => 'Cập nhật thành công'
@@ -58,17 +58,19 @@ class TagController extends Controller
 
     public function delete($id)
     {
-        $data = $this->tag->show($id);
+        $data = $this->tagRepository->find($id);
         if (empty($data)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Thêm mới không thành công'
+                'message' => 'Xoá không thành công'
             ]);
         }
-        $data = $this->tag->delete($id);
+        $tag = $this->tagRepository->deleteTag($id);
+//        dd($tag);
+        $data = $this->tagRepository->delete($id);
         return response()->json([
             'status' => true,
-            'message' => 'Thêm mới thành công'
+            'message' => 'Xoá thành công'
         ]);
     }
 }

@@ -3,24 +3,28 @@
 namespace App\Http\Controllers\CMS;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PostRequest;
-use App\Repositories\Backend\PostRepository;
+use App\Repositories\IPostRepository;
+use App\Repositories\ITagRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
 //    use image_Upload;
-    protected $post;
+    protected $postRepository;
+    protected $tagRepository;
 
-    public function __construct(PostRepository $post)
+    public function __construct(IPostRepository $postRepository, ITagRepository $tagRepository)
     {
-        $this->post = $post;
+        $this->postRepository = $postRepository;
+        $this->tagRepository = $tagRepository;
     }
 
     public function getAllPost()
     {
-        $data = $this->post->index();
+        $data = $this->postRepository->all();
         return response()->json([
             'status' => true,
             'data' => $data
@@ -30,26 +34,33 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-//        $data['user_id'] = Auth::user()->id();
         $data['image'] = $this->uploadImage($request);
-        $post = $this->post->store($data);
-//        dd($post);
-        if (!empty($post)) {
-            return response()->json([
-                'status' => true,
-                'data' => $post,
-                'message' => 'Tạo bài viết thành công'
-            ]);
-        }
+        $post = $this->postRepository->create($data);
+//        if (!empty($post)) {
+//            return response()->json([
+//                'status' => true,
+//                'data' => $post,
+//                'message' => 'Tạo bài viết thành công'
+//            ]);
+//        }
+
+        Log::channel('customLog')->error('Fail :',['data' => $post]);
         return response()->json([
             'status' => false,
             'message' => 'Tạo bài viết không thành công'
         ]);
     }
 
+    public function edit($id)
+    {
+        $tag = $this->tagRepository->all();
+        $data = $this->postRepository->find($id);
+        return view('editpost')->with('tag', $tag)->with('data', $data);
+    }
+
     public function update($id, Request $request)
     {
-        $data = $this->post->show($id);
+        $data = $this->postRepository->find($id);
         if (empty($data->id)) {
             return response()->json([
                 'status' => false,
@@ -58,7 +69,7 @@ class PostController extends Controller
         }
         $data = $request->all();
         $data['image'] = $this->uploadImage($request);
-        $post = $this->post->update($id, $data);
+        $post = $this->postRepository->update($id, $data);
 
         return response()->json([
             'status' => true,
@@ -68,7 +79,7 @@ class PostController extends Controller
 
     public function show($id)
     {
-        $post = $this->post->show($id);
+        $post = $this->postRepository->find($id);
         if (empty($post)) {
             return response()->json([
                 'status' => false,
@@ -83,14 +94,14 @@ class PostController extends Controller
 
     public function delete($id)
     {
-        $post = $this->post->show($id);
+        $post = $this->postRepository->find($id);
         if (empty($post)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Không tìm thấy'
             ]);
         }
-        $this->post->delete($id);
+        $this->postRepository->delete($id);
         return response()->json([
             'status' => true,
             'message' => 'Xoá thành công'

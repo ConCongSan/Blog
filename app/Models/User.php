@@ -4,13 +4,18 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @method static find($id)
+ */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +29,8 @@ class User extends Authenticatable
         'phone',
         'avatar',
         'password',
+        'provider',
+        'token'
     ];
 
     /**
@@ -46,4 +53,14 @@ class User extends Authenticatable
 //    ];
 
     protected $table = 'users';
+
+    public function post()
+    {
+        return $this->hasMany(Post::class, 'user_id');
+    }
+
+    public function mail()
+    {
+        return $this->hasMany(Mail::class,'user_id');
+    }
 }

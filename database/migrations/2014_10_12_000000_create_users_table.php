@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('phone')->unique()->nullable();
             $table->string('isAdmin')->nullable();
+            $table->string('provider')->nullable();
+            $table->string('token')->nullable();
             $table->string('avatar')->default('avartar.jpg')->nullable();
             $table->string('password')->nullable();
             $table->rememberToken();

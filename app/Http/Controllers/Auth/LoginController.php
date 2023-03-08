@@ -3,17 +3,18 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Backend\UserRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller
 {
-    protected $user;
 
-    public function __construct(UserRepository $user)
+    public function index()
     {
-        $this->user = $user;
+        return view('login');
     }
 
     public function handle(Request $request)
@@ -22,16 +23,29 @@ class LoginController extends Controller
             'username' => $request->username,
             'password' => $request->password
         ];
-
         if (!Auth::attempt($data)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Đăng nhập thất bại'
-            ]);
+            return 'Dang nhap that bai';
         }
-        return response()->json([
-            'status' => true,
-            'message' => 'Đăng nhập thành công'
-        ]);
+
+        $sendEmail = 'kensu8434@gmail.com';
+        $testmail = 'thinh';
+        Mail::send('email', compact('testmail'), function ($email) {
+            $email->subject('Tìm đồ thất lạc');
+            $email->to('kensu8434@gmail.com');
+            Log::channel('LogMail')->info('Success :', ['data' => $email]);
+        });
+
+
+//        return response()->json([
+//            'status' => false,
+//            'message' => 'Tạo bài viết không thành công'
+//        ]);
+        return redirect()->route('getAllUser');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        return redirect()->route('login');
     }
 }

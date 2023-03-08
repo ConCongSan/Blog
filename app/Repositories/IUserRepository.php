@@ -1,11 +1,18 @@
 <?php
+
 namespace App\Repositories;
 
-interface IUserReponsitory
+interface IUserRepository
 {
     public function all();
-    public function create();
-    public function find();
-    public function update();
-    public function delete();
+
+    public function create(array $data);
+
+    public function find($id);
+
+    public function update($id, array $data);
+
+    public function delete($id);
+
+    public function deletePost($id);
 }

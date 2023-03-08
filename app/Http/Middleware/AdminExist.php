@@ -16,9 +16,9 @@ class AdminExist
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = User::where('isAdmin', '=', 1)->count();
+        $user = User::all()->count();
         if ($user == 0) {
-            return redirect('/admin/login');
+            return redirect('/admin/register');
         }
 //        if (!Auth::check()) {
 //            return redirect('/admin/login');

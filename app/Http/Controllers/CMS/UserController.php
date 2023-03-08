@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\CMS;
 
 use App\Http\Controllers\Controller;
+use App\Models\Post;
 use App\Models\User;
 use App\Repositories\Backend\UserRepository;
+use App\Repositories\IUserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,16 +21,16 @@ use Illuminate\Support\Str;
 class UserController extends Controller
 {
 //    use imageUpload;
-    protected $user;
+    protected $userRepository;
 
-    public function __construct(UserRepository $user)
+    public function __construct(IUserRepository $userRepository)
     {
-        $this->user = $user;
+        $this->userRepository = $userRepository;
     }
 
     public function getAllUser()
     {
-        $data = $this->user->index();
+        $data = $this->userRepository->all();
         return response()->json([
             'status' => true,
             'data' => $data
@@ -39,7 +41,7 @@ class UserController extends Controller
     {
         $data = $request->all();
         $data['avatar'] = $this->uploadImage($request);
-        $user = $this->user->update($id, $data);
+        $user = $this->userRepository->update($id, $data);
         return response()->json([
             'status' => true,
             'message' => 'Cập nhật tài khoản thành công'
@@ -82,7 +84,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = $this->user->show($id);
+        $user = $this->userRepository->find($id);
         if (empty($user)) {
             return response()->json([
                 'status' => false,
@@ -109,17 +111,13 @@ class UserController extends Controller
 
     public function delete($id)
     {
-        $user = $this->user->delete($id);
-        if (empty($user)) {
-            return response()->json([
-                'status' => true,
-                'message' => 'Đã xoá thành công'
-            ]);
-        }
+        $user = $this->userRepository->delete($id);
+        $post = $this->userRepository->deletePost($id);
         return response()->json([
-            'status' => false,
-            'message' => 'Xoá không thành công'
+            'status' => true,
+            'message' => 'Đã xoá thành công',
         ]);
+
     }
 
     function checkToken(User $user, $token)
